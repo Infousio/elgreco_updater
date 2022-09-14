@@ -1,23 +1,46 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState, useEffect } from "react";
+
+import db from "./firebase-config";
+import { collection, getDocs } from "firebase/firestore";
+
+import "./App.css";
 
 function App() {
+  const [food, setFood] = useState({});
+  const [drinks, setDrinks] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      const foodSnapshot = await getDocs(collection(db, "food"));
+      foodSnapshot.forEach(doc => {
+        const foodCat = {};
+        foodCat[doc.id] = {...doc.data()};
+        setFood(prevFood => (
+          {...prevFood, ...foodCat}
+        ));
+      });
+      setIsLoading(false);
+    };
+    fetchData();
+  }, [setFood]);
+
+  const Buttons = () => {
+
+    const buttonNames = [];
+    for(const catName in food) {
+      buttonNames.push(catName);
+    };
+    
+    return buttonNames.forEach(catName => {
+      <button className="button">{catName}</button>
+    });
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {isLoading ? "Is Loading" : <Buttons />}
     </div>
   );
 }
