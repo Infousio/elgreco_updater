@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import db from "./firebase-config";
 import { collection, getDocs } from "firebase/firestore";
 
+import { ItemContainer } from "./components/itemContainer";
+
 import "./App.css";
 
 function App() {
@@ -14,35 +16,17 @@ function App() {
     const fetchData = async () => {
       setIsLoading(true);
       const foodSnapshot = await getDocs(collection(db, "food"));
-      foodSnapshot.forEach(doc => {
+      foodSnapshot.forEach((doc) => {
         const foodCat = {};
-        foodCat[doc.id] = {...doc.data()};
-        setFood(prevFood => (
-          {...prevFood, ...foodCat}
-        ));
+        foodCat[doc.id] = { ...doc.data() };
+        setFood((prevFood) => ({ ...prevFood, ...foodCat }));
       });
       setIsLoading(false);
     };
     fetchData();
-  }, [setFood]);
+  }, [setFood, setIsLoading]);
 
-  const Buttons = () => {
-
-    const buttonNames = [];
-    for(const catName in food) {
-      buttonNames.push(catName);
-    };
-    
-    return buttonNames.forEach(catName => {
-      <button className="button">{catName}</button>
-    });
-  };
-
-  return (
-    <div className="App">
-      {isLoading ? "Is Loading" : <Buttons />}
-    </div>
-  );
+  return isLoading ? "Is Loading" : <ItemContainer data={food}/>
 }
 
 export default App;
